@@ -10,12 +10,12 @@ class MethodChannelScanner extends ScannerPlatform {
   final methodChannel = const MethodChannel('scanner');
 
   @override
-  Future<int?> initScanner() async =>
-     await methodChannel.invokeMethod<int?>('init');
+  Future<String?> initScanner() async =>
+      await methodChannel.invokeMethod<String?>('init');
 
   @override
-  Future<int?> openScanner() async =>
-      await methodChannel.invokeMethod<int?>('open');
+  Future<String?> openScanner() async =>
+      await methodChannel.invokeMethod<String?>('open');
 
   @override
   Future<void> releaseScanner() async =>
@@ -24,6 +24,4 @@ class MethodChannelScanner extends ScannerPlatform {
   @override
   Future<String?> getProps() async =>
       await methodChannel.invokeMethod<String?>('getProps');
-
-
 }

@@ -1,9 +1,7 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'dart:async';
-
-import 'package:flutter/services.dart';
 import 'package:scanner/scanner.dart';
 
 void main() {
@@ -19,7 +17,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final _scannerPlugin = Scanner();
-
+  String? _scannerProps;
   @override
   void initState() {
     super.initState();
@@ -28,7 +26,15 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> initPlatformState() async {
     try {
-      await _scannerPlugin.initScanner();
+      await _scannerPlugin.initScanner().then((_) async {
+        try {
+          String? props = await _scannerPlugin.getProps();
+          log('Scanner props: $props');
+          setState(() => _scannerProps = props);
+        } catch (e) {
+          log('Failed to get scanner props: ${e.toString()}');
+        }
+      });
     } catch (e) {
       inspect(e);
     }
@@ -38,18 +44,25 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
-        ),
-        body: Column(
-          children: [
-            TextButton(
-              onPressed: ()=> _scannerPlugin.openScanner(),
-              child: const Text('Open'),),
-
-          ],
-        )
-      ),
+          appBar: AppBar(
+            title: const Text('Plugin example app'),
+          ),
+          body: Column(
+            children: [
+              Text('Scanner props: $_scannerProps'),
+              TextButton(
+                onPressed: () async {
+                  try {
+                    final result = await _scannerPlugin.openScanner();
+                    log(result!);
+                  } catch (e) {
+                    inspect(e);
+                  }
+                },
+                child: const Text('Open'),
+              ),
+            ],
+          )),
     );
   }
 }

@@ -14,7 +14,7 @@ abstract class ScannerPlatform extends PlatformInterface {
   ///
   /// Defaults to [MethodChannelScanner].
   static ScannerPlatform get instance => _instance;
-  
+
   /// Platform-specific implementations should set this with their own
   /// platform-specific class that extends [ScannerPlatform] when
   /// they register themselves.
@@ -23,16 +23,15 @@ abstract class ScannerPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<int?> initScanner() =>
-    throw UnimplementedError('initScanner() has not been implemented.');
+  Future<String?> initScanner() =>
+      throw UnimplementedError('initScanner() has not been implemented.');
 
-  Future<int?> openScanner()=>
+  Future<String?> openScanner() =>
       throw UnimplementedError('openScanner() has not been implemented.');
 
-  Future<void> releaseScanner()=>
+  Future<void> releaseScanner() =>
       throw UnimplementedError('releaseScanner() has not been implemented.');
 
   Future<String?> getProps() =>
       throw UnimplementedError('getProps() has not been implemented.');
-
 }
