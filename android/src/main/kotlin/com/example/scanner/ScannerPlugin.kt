@@ -1,6 +1,6 @@
 package com.example.scanner
 
-import androidx.annotation.NonNull
+import com.sim.scanner.ScannerManager
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
@@ -16,20 +16,34 @@ class ScannerPlugin: FlutterPlugin, MethodCallHandler {
   /// when the Flutter Engine is detached from the Activity
   private lateinit var channel : MethodChannel
 
-  override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+  override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+    ScannerManager.init(flutterPluginBinding.applicationContext)
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "scanner")
     channel.setMethodCallHandler(this)
   }
 
-  override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
-    if (call.method == "getPlatformVersion") {
-      result.success("Android ${android.os.Build.VERSION.RELEASE}")
-    } else {
-      result.notImplemented()
+  override fun onMethodCall(call: MethodCall,  result: Result) {
+    when (call.method) {
+      "init" -> {
+        ScannerManager.getInstance().initScanner()
+        result.success("scan")
+      }
+      "open" -> {
+        ScannerManager.getInstance().OpenScanner()
+        result.success("stop")
+      }
+      "release" -> {
+        ScannerManager.getInstance().ReleaseScanner()
+        result.success("release")
+      }
+      "getProps" -> {
+        result.success(ScannerManager.getInstance().prop)
+      }
+      else -> result.notImplemented()
     }
   }
 
-  override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
+  override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
     channel.setMethodCallHandler(null)
   }
 }

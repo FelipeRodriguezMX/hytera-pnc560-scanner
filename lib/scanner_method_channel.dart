@@ -10,8 +10,20 @@ class MethodChannelScanner extends ScannerPlatform {
   final methodChannel = const MethodChannel('scanner');
 
   @override
-  Future<String?> getPlatformVersion() async {
-    final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
-    return version;
-  }
+  Future<int?> initScanner() async =>
+     await methodChannel.invokeMethod<int?>('init');
+
+  @override
+  Future<int?> openScanner() async =>
+      await methodChannel.invokeMethod<int?>('open');
+
+  @override
+  Future<void> releaseScanner() async =>
+      await methodChannel.invokeMethod<int?>('release');
+
+  @override
+  Future<String?> getProps() async =>
+      await methodChannel.invokeMethod<String?>('getProps');
+
+
 }

@@ -23,7 +23,16 @@ abstract class ScannerPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<String?> getPlatformVersion() {
-    throw UnimplementedError('platformVersion() has not been implemented.');
-  }
+  Future<int?> initScanner() =>
+    throw UnimplementedError('initScanner() has not been implemented.');
+
+  Future<int?> openScanner()=>
+      throw UnimplementedError('openScanner() has not been implemented.');
+
+  Future<void> releaseScanner()=>
+      throw UnimplementedError('releaseScanner() has not been implemented.');
+
+  Future<String?> getProps() =>
+      throw UnimplementedError('getProps() has not been implemented.');
+
 }

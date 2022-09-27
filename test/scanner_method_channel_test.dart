@@ -1,4 +1,4 @@
-import 'package:flutter/services.dart';
+/*import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:scanner/scanner_method_channel.dart';
 
@@ -21,4 +21,4 @@ void main() {
   test('getPlatformVersion', () async {
     expect(await platform.getPlatformVersion(), '42');
   });
-}
+}*/
