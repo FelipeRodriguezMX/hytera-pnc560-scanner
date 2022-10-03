@@ -18,6 +18,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final _scannerPlugin = Scanner();
   String? _scannerProps;
+
   @override
   void initState() {
     super.initState();
@@ -26,15 +27,16 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> initPlatformState() async {
     try {
-      await _scannerPlugin.initScanner().then((_) async {
-        try {
-          String? props = await _scannerPlugin.getProps();
-          log('Scanner props: $props');
-          setState(() => _scannerProps = props);
-        } catch (e) {
-          log('Failed to get scanner props: ${e.toString()}');
-        }
-      });
+      // await _scannerPlugin.init();
+      await _scannerPlugin.initScanner();
+      inspect(
+          await _scannerPlugin.setParams(parameterNumber: '136', value: '99'));
+      inspect(
+          await _scannerPlugin.setParams(parameterNumber: '137', value: '99'));
+      inspect(
+          await _scannerPlugin.setParams(parameterNumber: '649', value: '1'));
+      final props = await _scannerPlugin.getProps();
+      setState(() => _scannerProps = props);
     } catch (e) {
       inspect(e);
     }
@@ -54,13 +56,47 @@ class _MyAppState extends State<MyApp> {
                 onPressed: () async {
                   try {
                     final result = await _scannerPlugin.openScanner();
-                    log(result!);
+                   _scannerPlugin.qrCodeStream?.listen((event) {
+                      inspect(event);
+                    });
+                    inspect(result);
                   } catch (e) {
                     inspect(e);
                   }
                 },
                 child: const Text('Open'),
               ),
+              TextButton(
+                onPressed: () async {
+                  try {
+                    await _scannerPlugin.closeScanner();
+                  } catch (e) {
+                    inspect(e);
+                  }
+                },
+                child: const Text('Close'),
+              ),
+           /*   TextButton(
+                onPressed: () async {
+                  try {
+                    await _scannerPlugin.releaseScanner();
+                  } catch (e) {
+                    inspect(e);
+                  }
+                },
+                child: const Text('Release'),
+              ),*/
+              /*StreamBuilder(
+                stream: _scannerPlugin.qrCodeStream,
+                builder: (context, snapshot) {
+                  inspect(snapshot);
+                  log('sasasa');
+                  if (snapshot.hasData) {
+                    return Text('QR code: ${snapshot.data}');
+                  }
+                  return const Text('No QR code');
+                },
+              )*/
             ],
           )),
     );

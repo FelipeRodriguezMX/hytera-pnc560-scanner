@@ -7,21 +7,52 @@ import 'scanner_platform_interface.dart';
 class MethodChannelScanner extends ScannerPlatform {
   /// The method channel used to interact with the native platform.
   @visibleForTesting
-  final methodChannel = const MethodChannel('scanner');
+  static const methodChannel = MethodChannel('scanner');
+  static const eventChannel = EventChannel('scannerStream');
+  Stream<String>? _qrCodeStream;
 
   @override
-  Future<String?> initScanner() async =>
-      await methodChannel.invokeMethod<String?>('init');
+  Future<int?> init() async => await methodChannel.invokeMethod<int?>('init');
 
   @override
-  Future<String?> openScanner() async =>
-      await methodChannel.invokeMethod<String?>('open');
+  Future<int?> initScanner() async =>
+      await methodChannel.invokeMethod<int?>('initScanner');
+
+  @override
+  Future<int?> openScanner() async =>
+      await methodChannel.invokeMethod<int?>('start');
+
+  @override
+  Future<String?> getProps() async =>
+      await methodChannel.invokeMethod<String?>('getProps');
+
+  @override
+  Future<String?> getParams({
+    required String parameterNumber,
+  }) async =>
+      await methodChannel.invokeMethod<String?>('getParams', {
+        'parameterNumber': parameterNumber,
+      });
+
+  @override
+  Future<int?> setParams({
+    required String parameterNumber,
+    required String value,
+  }) async =>
+      await methodChannel.invokeMethod<int?>('setParams', {
+        'parameterNumber': parameterNumber,
+        'value': value,
+      });
+
+  @override
+  Future<void> closeScanner() async =>
+      await methodChannel.invokeMethod<int?>('close');
 
   @override
   Future<void> releaseScanner() async =>
       await methodChannel.invokeMethod<int?>('release');
 
   @override
-  Future<String?> getProps() async =>
-      await methodChannel.invokeMethod<String?>('getProps');
+  Stream<String>? get qrCodeStream => _qrCodeStream ??=
+      eventChannel.receiveBroadcastStream().map<String>((event) => event);
 }
