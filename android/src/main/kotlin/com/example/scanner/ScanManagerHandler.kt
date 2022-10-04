@@ -1,27 +1,20 @@
 package com.example.scanner
 
-import android.app.Activity
-import android.content.Intent
+
 import android.util.Log
 import com.sim.scanner.ScannerManager
 import com.sim.scanner.ScannerManager.ScannerManagerListener
-import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import io.flutter.view.TextureRegistry
 
-class ScanManagerHandler(
-    private val activity: Activity,
-    private val textureRegistry: TextureRegistry,
-    private val flutter: FlutterPlugin.FlutterPluginBinding
-) : MethodChannel.MethodCallHandler, EventChannel.StreamHandler {
+class ScanManagerHandler: MethodChannel.MethodCallHandler, EventChannel.StreamHandler {
 
     private var mEventSink: EventChannel.EventSink? = null
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
-            "initScanner" -> result.success(ScannerManager.getInstance().initScanner())
+//            "initScanner" -> result.success(ScannerManager.getInstance().initScanner())
             "start" -> start(result)
             "setParams" -> setParams(call, result)
             "getParams" -> getParams(call, result)
@@ -51,6 +44,7 @@ class ScanManagerHandler(
         Log.d("ScannerPlugin", "openScanner $openScannerStatus")
 
         if (openScannerStatus == 0) {
+            Log.d("ScannerPlugin", "pito")
             ScannerManager.getInstance().addScannerManagerListener(object : ScannerManagerListener {
                 override fun Error(p0: Int, p1: String?) {
                     Log.d("ScannerPlugin", "Error $p0 $p1")
@@ -60,7 +54,9 @@ class ScanManagerHandler(
                     Log.d("ScannerPlugin", "decodeResult $p0 $p1")
                 }
             })
+            ScannerManager.getInstance()
         }
+
         ScannerManager.getInstance().addScannerManagerListener(object : ScannerManagerListener {
             override fun Error(p0: Int, p1: String?) {
                 Log.d("ScannerPlugin", "Error $p0 $p1")
@@ -70,8 +66,6 @@ class ScanManagerHandler(
                 Log.d("ScannerPlugin", "decodeResult $p0 $p1")
             }
         })
-
-        result.success(openScannerStatus)
     }
 
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {

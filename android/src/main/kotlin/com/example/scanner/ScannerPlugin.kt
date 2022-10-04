@@ -27,7 +27,7 @@ class ScannerPlugin: FlutterPlugin, ActivityAware {
   override fun onAttachedToActivity(binding: ActivityPluginBinding) {
     ScannerManager.init(this.flutter!!.applicationContext)
     activity = binding
-    handler = ScanManagerHandler( activity!!.activity, flutter!!.textureRegistry, this.flutter!!)
+    handler = ScanManagerHandler()
     method = MethodChannel(flutter!!.binaryMessenger, "scanner")
     event = EventChannel(flutter!!.binaryMessenger, "scannerStream")
     method?.setMethodCallHandler(handler)
