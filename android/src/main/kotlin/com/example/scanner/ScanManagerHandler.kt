@@ -44,7 +44,7 @@ class ScanManagerHandler: MethodChannel.MethodCallHandler, EventChannel.StreamHa
         Log.d("ScannerPlugin", "openScanner $openScannerStatus")
 
         if (openScannerStatus == 0) {
-            Log.d("ScannerPlugin", "pito")
+            Log.d("ScannerPlugin", "test")
             ScannerManager.getInstance().addScannerManagerListener(object : ScannerManagerListener {
                 override fun Error(p0: Int, p1: String?) {
                     Log.d("ScannerPlugin", "Error $p0 $p1")
