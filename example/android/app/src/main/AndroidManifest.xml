@@ -1,9 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.scanner_example">
-    <uses-permission android:name="android.permission.CAMERA"/>
-     <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE"/> 
+    package="com.example.hytera_example">
    <application
-        android:label="scanner_example"
+        android:label="hytera_example"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

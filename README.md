@@ -1,6 +1,6 @@
-# scanner
+# hytera
 
-A new Flutter plugin project.
+A new Flutter project.
 
 ## Getting Started
 

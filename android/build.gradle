@@ -1,4 +1,4 @@
-group 'com.example.scanner'
+group 'com.example.hytera'
 version '1.0-SNAPSHOT'
 
 buildscript {

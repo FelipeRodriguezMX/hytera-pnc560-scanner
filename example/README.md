@@ -1,6 +1,6 @@
-# scanner_example
+# hytera_example
 
-Demonstrates how to use the scanner plugin.
+Demonstrates how to use the hytera plugin.
 
 ## Getting Started
 

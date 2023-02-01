@@ -1,5 +1,4 @@
-package com.example.scanner
-
+package com.example.hytera
 
 import com.sim.scanner.ScannerManager
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -8,8 +7,8 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 
-/** ScannerPlugin */
-class ScannerPlugin: FlutterPlugin, ActivityAware {
+/** HyteraPlugin */
+class HyteraPlugin: FlutterPlugin, ActivityAware {
   private var flutter: FlutterPlugin.FlutterPluginBinding ?= null
   private var method : MethodChannel ?= null
   private var event : EventChannel ?= null
@@ -28,8 +27,8 @@ class ScannerPlugin: FlutterPlugin, ActivityAware {
     ScannerManager.init(this.flutter!!.applicationContext)
     activity = binding
     handler = ScanManagerHandler()
-    method = MethodChannel(flutter!!.binaryMessenger, "scanner")
-    event = EventChannel(flutter!!.binaryMessenger, "scannerStream")
+    method = MethodChannel(flutter!!.binaryMessenger, "hyteraScanner")
+    event = EventChannel(flutter!!.binaryMessenger, "hyteraScannerStream")
     method?.setMethodCallHandler(handler)
     event?.setStreamHandler(handler)
   }
