@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.hytera_example">
+    package="com.hyterscan.hyterscan_example">
    <application
-        android:label="hytera_example"
+        android:label="hyterscan_example"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

@@ -1,7 +1,8 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:hytera/hytera.dart';
+import 'package:hyterscan/hyterscan.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,7 +16,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final _hyteraPlugin = Hytera();
+  final _hyteraPlugin = Hyterscan();
   String? _scannerProps;
   @override
   void initState() {

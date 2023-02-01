@@ -1,4 +1,4 @@
-# hytera
+# hyterscan
 
 A new Flutter project.
 

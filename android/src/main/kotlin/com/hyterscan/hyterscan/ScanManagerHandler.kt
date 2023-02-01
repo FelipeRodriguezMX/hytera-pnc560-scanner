@@ -1,22 +1,25 @@
-package com.example.hytera
+package com.hyterscan.hyterscan
 
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import com.sim.scanner.ScannerManager
-import com.sim.scanner.ScannerManager.BCR_ERROR
-import com.sim.scanner.ScannerManager.ScannerManagerListener
+import com.sim.scanner.ScannerManager.*
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 
-class ScanManagerHandler() : MethodChannel.MethodCallHandler, EventChannel.StreamHandler {
+class ScanManagerHandler( context : Context) : MethodChannel.MethodCallHandler, EventChannel.StreamHandler {
     private var mEventSink: EventChannel.EventSink? = null
+    private var ctx: Context? = context
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+        Log.d("ScanManagerHandler", "onMethodCall: ${call.method}")
+
         when (call.method) {
             "init"-> init()
-            "start" -> scan(result)
+            "scan" -> scan(result)
             "getProps" -> props(result)
             "close" -> close()
             else -> result.notImplemented()
@@ -24,6 +27,9 @@ class ScanManagerHandler() : MethodChannel.MethodCallHandler, EventChannel.Strea
     }
 
     private fun init(){
+        Log.d("ScanManagerHandler", "context: $ctx")
+
+        ScannerManager.init(ctx)
         ScannerManager.getInstance().addScannerManagerListener(object : ScannerManagerListener {
             override fun Error(p0: Int, p1: String?) {
                 Log.d("ScannerPlugin", "Error $p0 $p1")
@@ -32,8 +38,6 @@ class ScanManagerHandler() : MethodChannel.MethodCallHandler, EventChannel.Strea
             override fun decodeResult(p0: Int, p1: String?) {
                 Handler(Looper.getMainLooper()).post(Runnable {
                     Log.d("ScannerPlugin", "decodeResult $p0 $p1")
-//                    mEventSink?.success(p1)
-
                 })
             }
         })
@@ -43,12 +47,10 @@ class ScanManagerHandler() : MethodChannel.MethodCallHandler, EventChannel.Strea
         val initScanner = ScannerManager.getInstance().initScanner()
         if(initScanner == BCR_ERROR){
             Log.d("ScannerPlugin", "initScanner $initScanner")
-//            result.error("initScanner", "error initScanner $initScanner", null)
         }
         val openScannerStatus = ScannerManager.getInstance().OpenScanner()
         if ( openScannerStatus == BCR_ERROR) {
             Log.d("ScannerPlugin", "openScanner $openScannerStatus")
-//            result.error("openScanner", "error openScanner $openScannerStatus", null)
         }
     }
 

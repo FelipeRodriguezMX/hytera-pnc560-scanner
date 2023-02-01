@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import 'hytera_platform_interface.dart';
+import 'hyterscan_platform_interface.dart';
 
-class MethodChannelHytera extends HyteraPlatform {
+/// An implementation of [HyterscanPlatform] that uses method channels.
+class MethodChannelHyterscan extends HyterscanPlatform {
+  /// The method channel used to interact with the native platform.
   @visibleForTesting
   static const methodChannel = MethodChannel('hyteraScanner');
   static const eventChannel = EventChannel('hyteraScannerStream');
@@ -17,7 +19,7 @@ class MethodChannelHytera extends HyteraPlatform {
       await methodChannel.invokeMethod<String?>('getProps');
 
   @override
-  Future<void> init() async => await methodChannel.invokeMethod('init');
+  Future<void> init() async => await methodChannel.invokeMethod<void>('init');
 
   @override
   Future<int?> scan() async => await methodChannel.invokeMethod<int?>('scan');

@@ -1,7 +1,10 @@
+// import 'package:flutter/services.dart';
+// import 'package:flutter_test/flutter_test.dart';
+// import 'package:hyterscan/hyterscan_method_channel.dart';
 
 // void main() {
-//   MethodChannelHytera platform = MethodChannelHytera();
-//   const MethodChannel channel = MethodChannel('hytera');
+//   MethodChannelHyterscan platform = MethodChannelHyterscan();
+//   const MethodChannel channel = MethodChannel('hyterscan');
 
 //   TestWidgetsFlutterBinding.ensureInitialized();
 

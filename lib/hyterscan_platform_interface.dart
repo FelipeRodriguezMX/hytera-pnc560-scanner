@@ -1,17 +1,17 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-import 'hytera_method_channel.dart';
+import 'hyterscan_method_channel.dart';
 
-abstract class HyteraPlatform extends PlatformInterface {
-  HyteraPlatform() : super(token: _token);
+abstract class HyterscanPlatform extends PlatformInterface {
+  HyterscanPlatform() : super(token: _token);
 
   static final Object _token = Object();
 
-  static HyteraPlatform _instance = MethodChannelHytera();
+  static HyterscanPlatform _instance = MethodChannelHyterscan();
 
-  static HyteraPlatform get instance => _instance;
+  static HyterscanPlatform get instance => _instance;
 
-  static set instance(HyteraPlatform instance) {
+  static set instance(HyterscanPlatform instance) {
     PlatformInterface.verifyToken(instance, _token);
     _instance = instance;
   }

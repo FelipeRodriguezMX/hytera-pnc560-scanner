@@ -1,4 +1,4 @@
-name: hytera
+name: hyterscan
 description: A new Flutter project.
 version: 0.0.1
 homepage:
@@ -35,8 +35,8 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.example.hytera
-        pluginClass: HyteraPlugin
+        package: com.hyterscan.hyterscan
+        pluginClass: HyterscanPlugin
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:
