@@ -1,4 +1,4 @@
-package com.example.scanner_example
+package com.example.hytera_example
 
 import io.flutter.embedding.android.FlutterActivity
 
