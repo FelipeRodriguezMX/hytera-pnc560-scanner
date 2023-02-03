@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -21,11 +20,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    init();
-  }
-
-  Future<void> init() async {
-    await _hyteraPlugin.init();
+    _hyteraPlugin.init();
   }
 
   @override
@@ -33,7 +28,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Plugin example app'),
+          title: const Text('Hytera Scanner example app'),
         ),
         body: Column(
           children: [
@@ -46,29 +41,26 @@ class _MyAppState extends State<MyApp> {
                   inspect(e);
                 }
               },
-              child: const Text('Open'),
+              child: const Text('Scan'),
             ),
             TextButton(
-              onPressed: () async {
-                try {
-                  await _hyteraPlugin.close();
-                } catch (e) {
-                  inspect(e);
-                }
-              },
+              onPressed: () async => await _hyteraPlugin.close(),
               child: const Text('Close'),
             ),
             TextButton(
               onPressed: () async {
                 try {
                   final props = await _hyteraPlugin.getProps();
-                  inspect(props);
                   setState(() => _scannerProps = props);
                 } catch (e) {
                   inspect(e);
                 }
               },
-              child: const Text('Get props'),
+              child: const Text('Props'),
+            ),
+            StreamBuilder(
+              stream: _hyteraPlugin.scanStream,
+              builder: (context, snapshot) => Text('Stream: ${snapshot.data}'),
             ),
           ],
         ),
