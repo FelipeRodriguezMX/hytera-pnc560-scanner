@@ -7,8 +7,10 @@ class Hyterscan {
 
   Future<void> close() async => await HyterscanPlatform.instance.close();
 
+  Future<void> release() async => await HyterscanPlatform.instance.release();
+
   Future<String?> getProps() async =>
       await HyterscanPlatform.instance.getProps();
 
-  Stream<String>? get scanStream => HyterscanPlatform.instance.scanStream;
+  Stream<String?> get scanStream => HyterscanPlatform.instance.scanStream;
 }

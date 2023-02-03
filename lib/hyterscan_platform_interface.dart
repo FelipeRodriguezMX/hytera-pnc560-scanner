@@ -22,7 +22,9 @@ abstract class HyterscanPlatform extends PlatformInterface {
 
   Future<void> close();
 
+  Future<void> release();
+
   Future<String?> getProps();
 
-  Stream<String>? get scanStream;
+  Stream<String?> get scanStream;
 }

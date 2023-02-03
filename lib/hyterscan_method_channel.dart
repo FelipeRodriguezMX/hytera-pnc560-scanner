@@ -9,10 +9,12 @@ class MethodChannelHyterscan extends HyterscanPlatform {
   @visibleForTesting
   static const methodChannel = MethodChannel('hyteraScanner');
   static const eventChannel = EventChannel('hyteraScannerStream');
-  Stream<String>? _scanStream;
 
   @override
   Future<void> close() async => await methodChannel.invokeMethod('close');
+
+  @override
+  Future<void> release() async => await methodChannel.invokeMethod('release');
 
   @override
   Future<String?> getProps() async =>
@@ -25,6 +27,6 @@ class MethodChannelHyterscan extends HyterscanPlatform {
   Future<int?> scan() async => await methodChannel.invokeMethod<int?>('scan');
 
   @override
-  Stream<String>? get scanStream => _scanStream ??=
-      eventChannel.receiveBroadcastStream().map((event) => event);
+  Stream<String?> get scanStream =>
+      eventChannel.receiveBroadcastStream().map<String>((event) => event);
 }
