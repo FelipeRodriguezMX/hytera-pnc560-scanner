@@ -1,4 +1,4 @@
-group 'com.example.hytera'
+group 'com.hyterscan.hyterscan'
 version '1.0-SNAPSHOT'
 
 buildscript {
