@@ -1,18 +1,18 @@
-# Hytera PNC 560 Scanner Plugin
+import 'dart:developer';
 
-A new Flutter plugin for the device Hytera PNC 560 which allows to use it scanner functionality.
-
-## Handling errors
-
-## Example
-
-Here is an example of how to use the plugin:
-
-```dart
-
+import 'package:flutter/material.dart';
 import 'package:hyterscan/hyterscan.dart';
 
+void main() {
+  runApp(const MyApp());
+}
 
+class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
 
 class _MyAppState extends State<MyApp> {
   final _hyteraPlugin = Hyterscan();
@@ -20,7 +20,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-     _hyteraPlugin.init();
+    _hyteraPlugin.init();
   }
 
   @override
@@ -28,7 +28,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Plugin example app'),
+          title: const Text('Hytera Scanner example app'),
         ),
         body: Column(
           children: [
@@ -36,7 +36,7 @@ class _MyAppState extends State<MyApp> {
             TextButton(
               onPressed: () async {
                 try {
-                  final result = await _hyteraPlugin.scan();
+                  await _hyteraPlugin.scan();
                 } catch (e) {
                   inspect(e);
                 }
@@ -68,5 +68,3 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
-
-```
