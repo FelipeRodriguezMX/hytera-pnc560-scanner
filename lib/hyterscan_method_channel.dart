@@ -28,5 +28,5 @@ class MethodChannelHyterscan extends HyterscanPlatform {
 
   @override
   Stream<String?> get scanStream =>
-      eventChannel.receiveBroadcastStream().map<String>((event) => event);
+      eventChannel.receiveBroadcastStream().map<String?>((event) => event);
 }
