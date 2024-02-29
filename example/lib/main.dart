@@ -34,6 +34,16 @@ class _MyAppState extends State<MyApp> {
             TextButton(
               onPressed: () async {
                 try {
+                  await _hyteraPlugin.init();
+                } catch (e) {
+                  inspect(e);
+                }
+              },
+              child: const Text('Init'),
+            ),
+            TextButton(
+              onPressed: () async {
+                try {
                   final result = await _hyteraPlugin.scan();
                   inspect(result);
                 } catch (e) {
@@ -45,6 +55,13 @@ class _MyAppState extends State<MyApp> {
             TextButton(
               onPressed: () async => await _hyteraPlugin.release(),
               child: const Text('Release'),
+            ),
+            TextButton(
+              onPressed: () async {
+                final result = await _hyteraPlugin.hasInstance();
+                inspect(result);
+              },
+              child: const Text('Check instance'),
             ),
           ],
         ),

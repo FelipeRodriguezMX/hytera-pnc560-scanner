@@ -5,6 +5,8 @@ class Hyterscan {
 
   Future<void> release() async => await HyterscanPlatform.instance.release();
 
-  Future<bool?> get isInitialized async =>
-      await HyterscanPlatform.instance.hasInstance;
+  Future<bool?> hasInstance() async =>
+      await HyterscanPlatform.instance.hasInstance();
+
+  Future<void> init() async => await HyterscanPlatform.instance.init();
 }

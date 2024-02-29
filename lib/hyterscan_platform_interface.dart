@@ -16,11 +16,11 @@ abstract class HyterscanPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  // Future<void> init();
+  Future<void> init();
 
   Future<dynamic> scan();
 
   Future<void> release();
 
-  Future<bool?> get hasInstance;
+  Future<bool?> hasInstance();
 }
