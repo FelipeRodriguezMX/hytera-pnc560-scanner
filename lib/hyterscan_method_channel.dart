@@ -7,26 +7,18 @@ import 'hyterscan_platform_interface.dart';
 class MethodChannelHyterscan extends HyterscanPlatform {
   /// The method channel used to interact with the native platform.
   @visibleForTesting
-  static const methodChannel = MethodChannel('hyteraScanner');
-  static const eventChannel = EventChannel('hyteraScannerStream');
-
-  @override
-  Future<void> close() async => await methodChannel.invokeMethod('close');
+  static const methodChannel = MethodChannel('scanner');
 
   @override
   Future<void> release() async => await methodChannel.invokeMethod('release');
 
-  @override
-  Future<String?> getProps() async =>
-      await methodChannel.invokeMethod<String?>('getProps');
+  Future<dynamic> scan() async =>
+      await methodChannel.invokeMethod<dynamic>('scan');
 
   @override
-  Future<void> init() async => await methodChannel.invokeMethod<void>('init');
+  Future<bool?> hasInstance() async =>
+      await methodChannel.invokeMethod<bool>('hasInstances');
 
   @override
-  Future<int?> scan() async => await methodChannel.invokeMethod<int?>('scan');
-
-  @override
-  Stream<String?> get scanStream =>
-      eventChannel.receiveBroadcastStream().map<String>((event) => event);
+  Future<void> init() async => await methodChannel.invokeMethod('init');
 }

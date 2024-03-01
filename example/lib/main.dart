@@ -16,11 +16,10 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final _hyteraPlugin = Hyterscan();
-  String? _scannerProps;
+
   @override
   void initState() {
     super.initState();
-    _hyteraPlugin.init();
   }
 
   @override
@@ -32,11 +31,21 @@ class _MyAppState extends State<MyApp> {
         ),
         body: Column(
           children: [
-            Text('Scanner props: $_scannerProps'),
             TextButton(
               onPressed: () async {
                 try {
-                  await _hyteraPlugin.scan();
+                  await _hyteraPlugin.init();
+                } catch (e) {
+                  inspect(e);
+                }
+              },
+              child: const Text('Init'),
+            ),
+            TextButton(
+              onPressed: () async {
+                try {
+                  final result = await _hyteraPlugin.scan();
+                  inspect(result);
                 } catch (e) {
                   inspect(e);
                 }
@@ -44,23 +53,16 @@ class _MyAppState extends State<MyApp> {
               child: const Text('Scan'),
             ),
             TextButton(
-              onPressed: () async => await _hyteraPlugin.close(),
-              child: const Text('Close'),
+              onPressed: () async => await _hyteraPlugin.release(),
+              child: const Text('Release'),
             ),
             TextButton(
               onPressed: () async {
-                try {
-                  final props = await _hyteraPlugin.getProps();
-                  setState(() => _scannerProps = props);
-                } catch (e) {
-                  inspect(e);
-                }
+                final result = await _hyteraPlugin.hasInstance();
+                inspect(result);
               },
-              child: const Text('Props'),
-            ),
-            StreamBuilder(
-              stream: _hyteraPlugin.scanStream,
-              builder: (context, snapshot) => Text('Stream: ${snapshot.data}'),
+              child: const Text('Check instance'),
+
             ),
           ],
         ),
