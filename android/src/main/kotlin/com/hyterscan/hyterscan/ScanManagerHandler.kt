@@ -1,65 +1,139 @@
 package com.hyterscan.hyterscan
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
-import com.sim.scanner.ScannerManager
 import com.sim.scanner.ScannerManager.*
-import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import kotlinx.coroutines.*
 
-class ScanManagerHandler( context : Context) : MethodChannel.MethodCallHandler, EventChannel.StreamHandler {
-    private var mEventSink: EventChannel.EventSink? = null
+class ScanManagerHandler( context : Context) : MethodChannel.MethodCallHandler  {
+    private var scanCallback: ((Int, String?, String) -> Unit)? = null
     private var ctx: Context? = context
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "init"-> init()
             "scan" -> scan(result)
-            "getProps" -> result.success(getInstance().prop)
-            "close" -> getInstance().CloseScanner()
-            "release" -> getInstance().ReleaseScanner()
+            "release" ->  GlobalScope.launch(Dispatchers.Main) {
+                release(result)
+            }
+            "hasInstances" -> result.success(checkInstance())
             else -> result.notImplemented()
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun init(){
-        init(ctx)
+//       if(getInstance() == null){
+           try {
+               GlobalScope.launch(Dispatchers.Main) {
+                   withContext(Dispatchers.Default) {
+                       init(ctx)
+                       listener()
+                   }
+               }
+           }catch (e: Exception){
+               e.message?.let { Log.d("Scanner", it) }
+           }
+    }
+
+    private fun  checkInstance(): Boolean {
+        if(getInstance() == null){
+            return false
+        }
+        return true
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun listener(){
         getInstance().addScannerManagerListener(object : ScannerManagerListener {
             override fun Error(p0: Int, p1: String?) {
-                mEventSink?.error("Error", p1, p0)
+                GlobalScope.launch(Dispatchers.Main) {
+                    scanCallback?.invoke(p0, p1, "ERROR")
+                }
             }
-
             override fun decodeResult(p0: Int, p1: String?) {
-                Handler(Looper.getMainLooper()).post {
-                    mEventSink?.success(p1)
+                GlobalScope.launch(Dispatchers.Main) {
+                    scanCallback?.invoke(p0, p1, "SUCCESS")
                 }
             }
         })
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
+    private suspend fun release(result: MethodChannel.Result){
+        if(getInstance() == null){
+            Log.d("Scanner", "ScanManager not registered")
+            result.error("Error", "No instance", "Instance is null")
+            return
+        }
+//        GlobalScope.launch(Dispatchers.Main) {
+//            withContext(Dispatchers.Default) {
+//                try {
+//                    getInstance().ReleaseScanner()
+//                } catch (e: Exception) {
+//                    Log.d("Scanner", "Failed to release scanner ${e.message}")
+//                    result.error("Error", "Failed to release scanner", e.message)
+//                }
+//            }
+//            result.success("Scanner released successfully")
+//        }
+        try {
+            withContext(Dispatchers.Default) {
+                getInstance().ReleaseScanner()
+            }
+            withContext(Dispatchers.Main) {
+                result.success("Scanner released successfully")
+            }
+        } catch (e: Exception) {
+            Log.d("Scanner", "Failed to release scanner ${e.message}")
+            withContext(Dispatchers.Main) {
+                result.error("Error", "Failed to release scanner", e.message)
+            }
+        }
+    }
 
-
+    @OptIn(DelicateCoroutinesApi::class)
     private fun scan(result: MethodChannel.Result) {
-        val initScanner = getInstance().initScanner()
-        if(initScanner == BCR_ERROR) {
-            result.error("Error", "Scanner init error", initScanner)
+        GlobalScope.launch(Dispatchers.IO) {
+            val instance = getInstance()
+            if (instance == null) {
+                withContext(Dispatchers.Main) {
+                    Log.d("Scanner", "ScanManager not registered")
+                    result.error("Error", "No instance", "Instance is null")
+                }
+                return@launch
+            }
+
+            val initScanner = instance.initScanner()
+            if (initScanner == BCR_ERROR) {
+                withContext(Dispatchers.Main) {
+                    result.error("Error", "Scanner init error", initScanner)
+                }
+                return@launch
+            }
+
+            val openScannerStatus = instance.OpenScanner()
+            if (openScannerStatus == BCR_ERROR) {
+                withContext(Dispatchers.Main) {
+                    result.error("Error", "Scanner open error", openScannerStatus)
+                }
+                return@launch
+            }
+
+            GlobalScope.launch(Dispatchers.Main) {
+                scanCallback = { errorCode, scannedValue, status ->
+
+                    if (status == "SUCCESS") {
+                        result.success(scannedValue)
+                    } else {
+                        result.error("Error", "Scanner listener", errorCode)
+                    }
+                }
+            }
         }
-        val openScannerStatus = getInstance().OpenScanner()
-        if (openScannerStatus == BCR_ERROR) {
-            result.error("Error", "Scanner open error", openScannerStatus)
-        }
-
-    }
-
-    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-        this.mEventSink = events
-    }
-
-    override fun onCancel(arguments: Any?) {
-        this.mEventSink = null
     }
 }
 

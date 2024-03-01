@@ -8,24 +8,16 @@ import io.flutter.plugin.common.MethodChannel
 
 class HyterscanPlugin: FlutterPlugin, ActivityAware {
   private var method : MethodChannel?= null
-  private var event : EventChannel?= null
 
   override fun onAttachedToEngine(flutter: FlutterPlugin.FlutterPluginBinding) {
-    method = MethodChannel(flutter.binaryMessenger, "hyteraScanner")
-    event = EventChannel(flutter.binaryMessenger, "hyteraScannerStream")
+    method = MethodChannel(flutter.binaryMessenger, "scanner")
   }
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {}
 
   override fun onAttachedToActivity(binding: ActivityPluginBinding) {
     val handler = ScanManagerHandler(binding.activity.applicationContext)
-
-    method?.let {
-      it.setMethodCallHandler(handler)
-    }
-    event?.let {
-      it.setStreamHandler(handler)
-    }
+    method?.setMethodCallHandler(handler)
   }
 
   override fun onDetachedFromActivityForConfigChanges() {
@@ -37,10 +29,8 @@ class HyterscanPlugin: FlutterPlugin, ActivityAware {
   }
 
   override fun onDetachedFromActivity() {
-    event?.setStreamHandler(null)
     method?.setMethodCallHandler(null)
     method = null
-    event = null
   }
 }
 
