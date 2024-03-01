@@ -26,7 +26,6 @@ class ScanManagerHandler( context : Context) : MethodChannel.MethodCallHandler  
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun init(){
-//       if(getInstance() == null){
            try {
                GlobalScope.launch(Dispatchers.Main) {
                    withContext(Dispatchers.Default) {
@@ -69,17 +68,6 @@ class ScanManagerHandler( context : Context) : MethodChannel.MethodCallHandler  
             result.error("Error", "No instance", "Instance is null")
             return
         }
-//        GlobalScope.launch(Dispatchers.Main) {
-//            withContext(Dispatchers.Default) {
-//                try {
-//                    getInstance().ReleaseScanner()
-//                } catch (e: Exception) {
-//                    Log.d("Scanner", "Failed to release scanner ${e.message}")
-//                    result.error("Error", "Failed to release scanner", e.message)
-//                }
-//            }
-//            result.success("Scanner released successfully")
-//        }
         try {
             withContext(Dispatchers.Default) {
                 getInstance().ReleaseScanner()
@@ -134,6 +122,7 @@ class ScanManagerHandler( context : Context) : MethodChannel.MethodCallHandler  
                 }
             }
         }
+
     }
 }
 

@@ -62,6 +62,7 @@ class _MyAppState extends State<MyApp> {
                 inspect(result);
               },
               child: const Text('Check instance'),
+
             ),
           ],
         ),

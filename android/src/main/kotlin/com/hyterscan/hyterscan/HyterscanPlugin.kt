@@ -8,7 +8,6 @@ import io.flutter.plugin.common.MethodChannel
 
 class HyterscanPlugin: FlutterPlugin, ActivityAware {
   private var method : MethodChannel?= null
-
   override fun onAttachedToEngine(flutter: FlutterPlugin.FlutterPluginBinding) {
     method = MethodChannel(flutter.binaryMessenger, "scanner")
   }
