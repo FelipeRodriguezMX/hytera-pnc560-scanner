@@ -22,6 +22,8 @@ class _MyAppState extends State<MyApp> {
     super.initState();
   }
 
+  Object? _error;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -36,6 +38,7 @@ class _MyAppState extends State<MyApp> {
                 try {
                   await _hyteraPlugin.init();
                 } catch (e) {
+                  setState(() => _error = e);
                   inspect(e);
                 }
               },
@@ -47,6 +50,7 @@ class _MyAppState extends State<MyApp> {
                   final result = await _hyteraPlugin.scan();
                   inspect(result);
                 } catch (e) {
+                  setState(() => _error = e);
                   inspect(e);
                 }
               },
@@ -63,6 +67,7 @@ class _MyAppState extends State<MyApp> {
               },
               child: const Text('Check instance'),
             ),
+            if (_error != null) Text('Error: $_error'),
           ],
         ),
       ),
