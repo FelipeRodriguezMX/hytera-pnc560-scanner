@@ -26,7 +26,6 @@ class ScanManagerHandler( context : Context) : MethodChannel.MethodCallHandler  
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun init(){
-//       if(getInstance() == null){
            try {
                GlobalScope.launch(Dispatchers.Main) {
                    withContext(Dispatchers.Default) {
@@ -69,17 +68,6 @@ class ScanManagerHandler( context : Context) : MethodChannel.MethodCallHandler  
             result.error("Error", "No instance", "Instance is null")
             return
         }
-//        GlobalScope.launch(Dispatchers.Main) {
-//            withContext(Dispatchers.Default) {
-//                try {
-//                    getInstance().ReleaseScanner()
-//                } catch (e: Exception) {
-//                    Log.d("Scanner", "Failed to release scanner ${e.message}")
-//                    result.error("Error", "Failed to release scanner", e.message)
-//                }
-//            }
-//            result.success("Scanner released successfully")
-//        }
         try {
             withContext(Dispatchers.Default) {
                 getInstance().ReleaseScanner()
@@ -103,14 +91,6 @@ class ScanManagerHandler( context : Context) : MethodChannel.MethodCallHandler  
                 withContext(Dispatchers.Main) {
                     Log.d("Scanner", "ScanManager not registered")
                     result.error("Error", "No instance", "Instance is null")
-                }
-                return@launch
-            }
-
-            val initScanner = instance.initScanner()
-            if (initScanner == BCR_ERROR) {
-                withContext(Dispatchers.Main) {
-                    result.error("Error", "Scanner init error", initScanner)
                 }
                 return@launch
             }
