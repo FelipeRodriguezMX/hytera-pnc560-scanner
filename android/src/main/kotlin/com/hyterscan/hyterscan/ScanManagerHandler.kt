@@ -8,31 +8,28 @@ import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.CompletableDeferred
 
+
 class ScanManagerHandler(context: Context) : MethodChannel.MethodCallHandler {
     private var scanCallback: ((Int, String?, String) -> Unit)? = null
     private var ctx: Context? = context
-    private val job = Job()
+    private val job = SupervisorJob()  
     private val scope = CoroutineScope(Dispatchers.Main + job)
+
+    private var listenerRegistered = false  
+    private var serviceBound = false 
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
-            "init" -> scope.launch {
-                init(result)
-            }
-            "scan" -> scope.launch {
-                scan(result)
-            }
-            "release" -> scope.launch {
-                release(result)
-            }
+            "init" -> scope.launch { init(result) }
+            "scan" -> scope.launch { scan(result) }
+            "release" -> scope.launch { release(result) }
             "hasInstances" -> result.success(checkInstance())
             else -> result.notImplemented()
         }
-
     }
 
     fun cancel() {
-        job.cancel()
+        job.cancel()  
     }
 
     private suspend fun init(result: MethodChannel.Result) {
@@ -45,73 +42,76 @@ class ScanManagerHandler(context: Context) : MethodChannel.MethodCallHandler {
                     listener()
                 }
                 withContext(Dispatchers.Main) {
-                    deferredResult.complete(Unit)  // Completes successfully
+                    deferredResult.complete(Unit)
                     result.success("Initialization successful")
                 }
+                serviceBound = true  // Mark service as bound
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    deferredResult.completeExceptionally(e)  // Completes with an exception
+                    deferredResult.completeExceptionally(e)
                     result.error("Error", "Initialization failed", e.message)
                 }
             }
         }
 
-        // Await the deferred result (will be completed when the init operation is finished)
         deferredResult.await()
     }
-
 
     private fun checkInstance(): Boolean {
         return getInstance() != null
     }
 
     private fun listener() {
-        getInstance()?.addScannerManagerListener(object : ScannerManagerListener {
-            override fun Error(p0: Int, p1: String?) {
-                scope.launch {
-                    scanCallback?.invoke(p0, p1, "ERROR")
+        if (!listenerRegistered) {  // Prevent duplicate listener registrations
+            getInstance()?.addScannerManagerListener(object : ScannerManagerListener {
+                override fun Error(errorCode: Int, message: String?) {
+                    scope.launch { scanCallback?.invoke(errorCode, message, "ERROR") }
                 }
-            }
 
-            override fun decodeResult(p0: Int, p1: String?) {
-                scope.launch {
-                    scanCallback?.invoke(p0, p1, "SUCCESS")
+                override fun decodeResult(resultCode: Int, data: String?) {
+                    scope.launch { scanCallback?.invoke(resultCode, data, "SUCCESS") }
                 }
-            }
-        })
+            })
+            listenerRegistered = true
+        }
     }
 
     private suspend fun release(result: MethodChannel.Result) {
         val deferredResult = CompletableDeferred<Unit>()
 
+    // Use a scoped coroutine to ensure proper execution context
+    withContext(Dispatchers.Main) {
         val instance = getInstance()
         if (instance == null) {
-            withContext(Dispatchers.Main) {
-                Log.d("Scanner", "ScanManager not registered")
-                deferredResult.completeExceptionally(Exception("No instance"))
-                result.error("Error", "No instance", "Instance is null")
-            }
-            return
+            result.error("Error", "No instance", "Instance is null")
+            deferredResult.completeExceptionally(Exception("No instance"))
+            return@withContext
         }
 
         try {
-            withContext(Dispatchers.Default) {
-                instance.ReleaseScanner()
-            }
-            withContext(Dispatchers.Main) {
-                deferredResult.complete(Unit)  // Completes successfully with no result
+            if (serviceBound) { // Check if the service is still bound
+                listenerRegistered = false
+
+                // Ensure the ReleaseScanner() call is made on the Default dispatcher
+                withContext(Dispatchers.Default) {
+                    instance.ReleaseScanner()
+                }
+
+                // Mark service as unbound and complete the result
+                serviceBound = false  
+                deferredResult.complete(Unit)
                 result.success("Scanner released successfully")
+            } else {
+                result.success("Service already unbound")
             }
         } catch (e: Exception) {
-            Log.d("Scanner", "Failed to release scanner: ${e.message}")
-            withContext(Dispatchers.Main) {
-                deferredResult.completeExceptionally(e)  // Completes with an exception
-                result.error("Error", "Failed to release scanner", e.message)
-            }
+            deferredResult.completeExceptionally(e)
+            result.error("Error", "Failed to release scanner", e.message)
         }
+    }
 
-        // Await the deferred result (will be completed when the release operation is finished)
-        deferredResult.await()
+    // Await completion of the deferred result
+    deferredResult.await()
     }
 
     private suspend fun scan(result: MethodChannel.Result) {
@@ -120,7 +120,6 @@ class ScanManagerHandler(context: Context) : MethodChannel.MethodCallHandler {
         val instance = getInstance()
         if (instance == null) {
             withContext(Dispatchers.Main) {
-                Log.d("Scanner", "ScanManager not registered")
                 deferredResult.completeExceptionally(Exception("No instance"))
                 result.error("Error", "No instance", "Instance is null")
             }
@@ -145,7 +144,6 @@ class ScanManagerHandler(context: Context) : MethodChannel.MethodCallHandler {
             return
         }
 
-        // Set up the callback to complete the deferred result
         scanCallback = { errorCode, scannedValue, status ->
             if (status == "SUCCESS") {
                 deferredResult.complete(scannedValue)
@@ -157,12 +155,6 @@ class ScanManagerHandler(context: Context) : MethodChannel.MethodCallHandler {
             }
         }
 
-        // Wait for the result (will be completed by the callback)
         deferredResult.await()
     }
-
-
-
 }
-
-
