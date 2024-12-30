@@ -75,7 +75,7 @@ You may choose to use this project under the terms of either the BSD-3-Clause or
 ### Third-Party Software Exception
 
 #### Hytera libscanner.jar
-The file `android/src/libs/libscanner.jar` is a proprietary library provided by Hytera for specific hardware functionality. This file:
+The files inside of `android/src/libs/` is a proprietary and provided by Hytera Communications Corporation Limited for specific hardware functionality. This file:
 - Is NOT covered by the project's main licenses
 - Remains the exclusive property of Hytera
 - Is used with permission for device-specific hardware interactions
