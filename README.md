@@ -2,74 +2,58 @@
 
 A new Flutter plugin for the device Hytera PNC 560 which allows to use it scanner functionality.
 
-## Handling errors
+## Include package to app
+Their are 2 ways to use the package.
 
-## Example
+This requires to clone repo and add it in pubspec.yaml file
+```
+hyterscan:
+    path: {$path of cloned repo}/hyterscan
+```
+Or by Github 
+```
+ git:
+      url: https://github.com/jlouage/flutter-carousel-pro.git
+      ref: main
+```
 
-Here is an example of how to use the plugin:
+The package implements the following methods:
 
-```dart
-
+## How to use 
+To use package in app first import it.
+```
 import 'package:hyterscan/hyterscan.dart';
+```
+Then implement it as the following:
+```
+final hyteraScan = Hyterscan();
 
+await hyteraScan.init();
 
+await hyteraScan.scan();
 
-class _MyAppState extends State<MyApp> {
-  final _hyteraPlugin = Hyterscan();
-  String? _scannerProps;
-  @override
-  void initState() {
-    super.initState();
-     _hyteraPlugin.init();
-  }
+await hyteraScan.hasInstance();
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
-        ),
-        body: Column(
-          children: [
-            Text('Scanner props: $_scannerProps'),
-            TextButton(
-              onPressed: () async {
-                try {
-                  final result = await _hyteraPlugin.scan();
-                } catch (e) {
-                  inspect(e);
-                }
-              },
-              child: const Text('Scan'),
-            ),
-            TextButton(
-              onPressed: () async => await _hyteraPlugin.close(),
-              child: const Text('Close'),
-            ),
-            TextButton(
-              onPressed: () async {
-                try {
-                  final props = await _hyteraPlugin.getProps();
-                  setState(() => _scannerProps = props);
-                } catch (e) {
-                  inspect(e);
-                }
-              },
-              child: const Text('Props'),
-            ),
-            StreamBuilder(
-              stream: _hyteraPlugin.scanStream,
-              builder: (context, snapshot) => Text('Stream: ${snapshot.data}'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+await hyteraScan.init();
 
 ```
+
+### release
+Releases the scanner service when it is no longer needed.
+Return Value: A Future<void> that completes when the scanner service has been released.
+
+### scan
+Initiates a scan using the Hytera PNC560 scanner.
+Return Value: A Future<dynamic> that completes with the result of the scan operation.
+
+### hasInstance
+Checks if an instance of the scanner service is available.
+Return Value: A Future<bool?> that completes with true if an instance of the scanner service is available, false if it is not available, or null if the check failed.
+
+### init
+Initializes the scanner service.
+Return Value: A Future<void> that completes when the scanner service has been initialized.
+
 
 ## Licensing
 
