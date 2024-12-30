@@ -70,3 +70,37 @@ class _MyAppState extends State<MyApp> {
 }
 
 ```
+
+## Licensing
+
+### Project Licenses
+This project is dual-licensed under two open-source licenses:
+
+1. **BSD-3-Clause License**
+   - Allows redistribution and use in source and binary forms
+   - Requires preservation of the original copyright notice
+   - Provides a disclaimer of liability
+
+2. **MIT License**
+   - Permits use, copying, modification, merging, publishing, distribution
+   - Requires inclusion of the original copyright notice
+   - Provides a disclaimer of liability
+
+You may choose to use this project under the terms of either the BSD-3-Clause or MIT license.
+
+### Third-Party Software Exception
+
+#### Hytera libscanner.jar
+The file `android/src/libs/libscanner.jar` is a proprietary library provided by Hytera for specific hardware functionality. This file:
+- Is NOT covered by the project's main licenses
+- Remains the exclusive property of Hytera
+- Is used with permission for device-specific hardware interactions
+
+### Full License Texts
+For the complete text of the BSD-3-Clause and MIT licenses, please refer to the LICENSE file for BSD-3 and LICENSE.md for MIT in the project root.
+
+### Usage and Redistribution
+When redistributing this project, you must:
+- Preserve all copyright notices
+- Include the original licenses
+- Clearly distinguish between project code and the Hytera proprietary library

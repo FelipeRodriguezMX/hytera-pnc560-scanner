@@ -1,3 +1,4 @@
+
 // <<<<<<<< HEAD:example/android/app/src/main/kotlin/com/hyterscan/hyterscan_example/MainActivity.kt
 package com.hyterscan.hyterscan_example
 // ========

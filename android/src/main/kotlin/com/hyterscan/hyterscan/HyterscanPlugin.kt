@@ -38,3 +38,4 @@ class HyterscanPlugin : FlutterPlugin, ActivityAware {
         scanManagerHandler = null
     }
 }
+
