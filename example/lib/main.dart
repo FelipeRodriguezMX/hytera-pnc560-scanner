@@ -16,10 +16,42 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final _hyteraPlugin = Hyterscan();
+  dynamic initError;
+  dynamic scanError;
+  dynamic releaseError;
+  dynamic hasInstanceError;
 
-  @override
-  void initState() {
-    super.initState();
+  Future<void> scan() async {
+    try {
+      final result = await _hyteraPlugin.scan();
+      log(result);
+    } catch (e) {
+      setState(() => initError = e);
+    }
+  }
+
+  Future<void> init() async {
+    try {
+      await _hyteraPlugin.init();
+    } catch (e) {
+      setState(() => scanError = e);
+    }
+  }
+
+  Future<void> release() async {
+    try {
+      await _hyteraPlugin.init();
+    } catch (e) {
+      setState(() => releaseError = e);
+    }
+  }
+
+  Future<void> hasInstance() async {
+    try {
+      await _hyteraPlugin.release();
+    } catch (e) {
+      setState(() => hasInstanceError = e);
+    }
   }
 
   @override
@@ -32,38 +64,25 @@ class _MyAppState extends State<MyApp> {
         body: Column(
           children: [
             TextButton(
-              onPressed: () async {
-                try {
-                  await _hyteraPlugin.init();
-                } catch (e) {
-                  inspect(e);
-                }
-              },
+              onPressed: () async => init(),
               child: const Text('Init'),
             ),
             TextButton(
-              onPressed: () async {
-                try {
-                  final result = await _hyteraPlugin.scan();
-                  inspect(result);
-                } catch (e) {
-                  inspect(e);
-                }
-              },
+              onPressed: () async => scan(),
               child: const Text('Scan'),
             ),
             TextButton(
-              onPressed: () async => await _hyteraPlugin.release(),
+              onPressed: () async => await release(),
               child: const Text('Release'),
             ),
             TextButton(
-              onPressed: () async {
-                final result = await _hyteraPlugin.hasInstance();
-                inspect(result);
-              },
+              onPressed: () async => hasInstance(),
               child: const Text('Check instance'),
-
             ),
+            Text('Error: $initError'),
+            Text('Error: $scanError'),
+            Text('Error: $releaseError'),
+            Text('Error: $hasInstanceError'),
           ],
         ),
       ),

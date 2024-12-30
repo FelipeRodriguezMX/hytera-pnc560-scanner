@@ -12,6 +12,7 @@ class MethodChannelHyterscan extends HyterscanPlatform {
   @override
   Future<void> release() async => await methodChannel.invokeMethod('release');
 
+  @override
   Future<dynamic> scan() async =>
       await methodChannel.invokeMethod<dynamic>('scan');
 

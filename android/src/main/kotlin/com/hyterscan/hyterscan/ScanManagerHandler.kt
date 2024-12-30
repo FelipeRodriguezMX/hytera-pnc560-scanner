@@ -6,123 +6,155 @@ import com.sim.scanner.ScannerManager.*
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.*
+import kotlinx.coroutines.CompletableDeferred
 
-class ScanManagerHandler( context : Context) : MethodChannel.MethodCallHandler  {
+
+class ScanManagerHandler(context: Context) : MethodChannel.MethodCallHandler {
     private var scanCallback: ((Int, String?, String) -> Unit)? = null
     private var ctx: Context? = context
+    private val job = SupervisorJob()  
+    private val scope = CoroutineScope(Dispatchers.Main + job)
 
-    @OptIn(DelicateCoroutinesApi::class)
+    private var listenerRegistered = false  
+    private var serviceBound = false 
+
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
-            "init"-> init()
-            "scan" -> scan(result)
-            "release" ->  GlobalScope.launch(Dispatchers.Main) {
-                release(result)
-            }
+            "init" -> scope.launch { init(result) }
+            "scan" -> scope.launch { scan(result) }
+            "release" -> scope.launch { release(result) }
             "hasInstances" -> result.success(checkInstance())
             else -> result.notImplemented()
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
-    private fun init(){
-           try {
-               GlobalScope.launch(Dispatchers.Main) {
-                   withContext(Dispatchers.Default) {
-                       init(ctx)
-                       listener()
-                   }
-               }
-           }catch (e: Exception){
-               e.message?.let { Log.d("Scanner", it) }
-           }
+    fun cancel() {
+        job.cancel()  
     }
 
-    private fun  checkInstance(): Boolean {
-        if(getInstance() == null){
-            return false
+    private suspend fun init(result: MethodChannel.Result) {
+        val deferredResult = CompletableDeferred<Unit>()
+
+        scope.launch {
+            try {
+                withContext(Dispatchers.Default) {
+                    init(ctx)
+                    listener()
+                }
+                withContext(Dispatchers.Main) {
+                    deferredResult.complete(Unit)
+                    result.success("Initialization successful")
+                }
+                serviceBound = true  // Mark service as bound
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    deferredResult.completeExceptionally(e)
+                    result.error("Error", "Initialization failed", e.message)
+                }
+            }
         }
-        return true
+
+        deferredResult.await()
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
-    private fun listener(){
-        getInstance().addScannerManagerListener(object : ScannerManagerListener {
-            override fun Error(p0: Int, p1: String?) {
-                GlobalScope.launch(Dispatchers.Main) {
-                    scanCallback?.invoke(p0, p1, "ERROR")
-                }
-            }
-            override fun decodeResult(p0: Int, p1: String?) {
-                GlobalScope.launch(Dispatchers.Main) {
-                    scanCallback?.invoke(p0, p1, "SUCCESS")
-                }
-            }
-        })
+    private fun checkInstance(): Boolean {
+        return getInstance() != null
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
-    private suspend fun release(result: MethodChannel.Result){
-        if(getInstance() == null){
-            Log.d("Scanner", "ScanManager not registered")
+    private fun listener() {
+        if (!listenerRegistered) {  // Prevent duplicate listener registrations
+            getInstance()?.addScannerManagerListener(object : ScannerManagerListener {
+                override fun Error(errorCode: Int, message: String?) {
+                    scope.launch { scanCallback?.invoke(errorCode, message, "ERROR") }
+                }
+
+                override fun decodeResult(resultCode: Int, data: String?) {
+                    scope.launch { scanCallback?.invoke(resultCode, data, "SUCCESS") }
+                }
+            })
+            listenerRegistered = true
+        }
+    }
+
+    private suspend fun release(result: MethodChannel.Result) {
+        val deferredResult = CompletableDeferred<Unit>()
+
+    // Use a scoped coroutine to ensure proper execution context
+    withContext(Dispatchers.Main) {
+        val instance = getInstance()
+        if (instance == null) {
             result.error("Error", "No instance", "Instance is null")
-            return
+            deferredResult.completeExceptionally(Exception("No instance"))
+            return@withContext
         }
+
         try {
-            withContext(Dispatchers.Default) {
-                getInstance().ReleaseScanner()
-            }
-            withContext(Dispatchers.Main) {
+            if (serviceBound) { // Check if the service is still bound
+                listenerRegistered = false
+
+                // Ensure the ReleaseScanner() call is made on the Default dispatcher
+                withContext(Dispatchers.Default) {
+                    instance.ReleaseScanner()
+                }
+
+                // Mark service as unbound and complete the result
+                serviceBound = false  
+                deferredResult.complete(Unit)
                 result.success("Scanner released successfully")
+            } else {
+                result.success("Service already unbound")
             }
         } catch (e: Exception) {
-            Log.d("Scanner", "Failed to release scanner ${e.message}")
-            withContext(Dispatchers.Main) {
-                result.error("Error", "Failed to release scanner", e.message)
-            }
+            deferredResult.completeExceptionally(e)
+            result.error("Error", "Failed to release scanner", e.message)
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
-    private fun scan(result: MethodChannel.Result) {
-        GlobalScope.launch(Dispatchers.IO) {
-            val instance = getInstance()
-            if (instance == null) {
-                withContext(Dispatchers.Main) {
-                    Log.d("Scanner", "ScanManager not registered")
-                    result.error("Error", "No instance", "Instance is null")
-                }
-                return@launch
+    // Await completion of the deferred result
+    deferredResult.await()
+    }
+
+    private suspend fun scan(result: MethodChannel.Result) {
+        val deferredResult = CompletableDeferred<String?>()
+
+        val instance = getInstance()
+        if (instance == null) {
+            withContext(Dispatchers.Main) {
+                deferredResult.completeExceptionally(Exception("No instance"))
+                result.error("Error", "No instance", "Instance is null")
             }
+            return
+        }
 
-            val initScanner = instance.initScanner()
-            if (initScanner == BCR_ERROR) {
-                withContext(Dispatchers.Main) {
-                    result.error("Error", "Scanner init error", initScanner)
-                }
-                return@launch
+        val initScanner = withContext(Dispatchers.Default) { instance.initScanner() }
+        if (initScanner == BCR_ERROR) {
+            withContext(Dispatchers.Main) {
+                deferredResult.completeExceptionally(Exception("Scanner init error"))
+                result.error("Error", "Scanner init error", initScanner)
             }
+            return
+        }
 
-            val openScannerStatus = instance.OpenScanner()
-            if (openScannerStatus == BCR_ERROR) {
-                withContext(Dispatchers.Main) {
-                    result.error("Error", "Scanner open error", openScannerStatus)
-                }
-                return@launch
+        val openScannerStatus = withContext(Dispatchers.Default) { instance.OpenScanner() }
+        if (openScannerStatus == BCR_ERROR) {
+            withContext(Dispatchers.Main) {
+                deferredResult.completeExceptionally(Exception("Scanner open error"))
+                result.error("Error", "Scanner open error", openScannerStatus)
             }
+            return
+        }
 
-            GlobalScope.launch(Dispatchers.Main) {
-                scanCallback = { errorCode, scannedValue, status ->
-
-                    if (status == "SUCCESS") {
-                        result.success(scannedValue)
-                    } else {
-                        result.error("Error", "Scanner listener", errorCode)
-                    }
-                }
+        scanCallback = { errorCode, scannedValue, status ->
+            if (status == "SUCCESS") {
+                deferredResult.complete(scannedValue)
+                result.success(scannedValue)
+            } else {
+                val error = Exception("Scanner listener error: $errorCode")
+                deferredResult.completeExceptionally(error)
+                result.error("Error", "Scanner listener", errorCode)
             }
         }
 
+        deferredResult.await()
     }
 }
-
